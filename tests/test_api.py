@@ -12,7 +12,7 @@ async def test_predict_success():
 
 @pytest.mark.anyio
 async def test_predict_incorrect_expected():
-    """2) Valide une prédiction avec un résultat attendu volontairement faux (utilisation de !=)"""
+    """2) Valide une prédiction avec un résultat attendu volontairement faux"""
     async with AsyncClient(app=app, base_url="http://test") as client:
         resp = await client.post("/predict", json={"features": [1.0, 2.0, 3.0]})
         assert resp.status_code == 200
@@ -20,7 +20,7 @@ async def test_predict_incorrect_expected():
 
 @pytest.mark.anyio
 async def test_predict_invalid_json():
-    """3) Valide l'envoi d'un JSON incorrect (champ features manquant)"""
+    """3) Valide l'envoi d'un JSON incorrect"""
     async with AsyncClient(app=app, base_url="http://test") as client:
         resp = await client.post("/predict", json={"feature1": 3.5, "feature2": 1.2, "feature3": 4.9})
         assert resp.status_code == 422
