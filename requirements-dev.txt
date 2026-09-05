@@ -1,4 +1,4 @@
--r requirements.txt  # inclut les dépendances prod
+-r app/requirements.txt  # inclut les dépendances prod
 
 # Test et coverage
 pytest
