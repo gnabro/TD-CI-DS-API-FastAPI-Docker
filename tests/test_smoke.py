@@ -8,3 +8,4 @@ async def test_smoke():
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.get("/")
         assert response.status_code == 200
+        assert response.json() == {"message": "API is up and running!"}
