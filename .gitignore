@@ -20,3 +20,7 @@ htmlcov/
 desktop.ini
 .DS_Store
 Thumbs.db
+
+# Documents Word (rapport - livrable séparé)
+*.docx
+~$*.docx
