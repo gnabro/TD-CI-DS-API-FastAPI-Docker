@@ -1,29 +1,34 @@
-import pytest
-from httpx import AsyncClient, ASGITransport
+from fastapi.testclient import TestClient
 from app.main import app
 
-@pytest.mark.anyio
-async def test_predict_success():
-    """1) Valide une prédiction correcte avec [1.0, 2.0, 3.0]"""
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        resp = await client.post("/predict", json={"features": [1.0, 2.0, 3.0]})
-        assert resp.status_code == 200
-        assert resp.json() == {"predictions": [2.0, 4.0, 6.0]}
+client = TestClient(app)
 
-@pytest.mark.anyio
-async def test_predict_incorrect_expected():
-    """2) Valide une prédiction avec un résultat attendu volontairement faux"""
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        resp = await client.post("/predict", json={"features": [1.0, 2.0, 3.0]})
-        assert resp.status_code == 200
-        assert resp.json() != {"predictions": [99.0, 99.0, 99.0]}
 
-@pytest.mark.anyio
-async def test_predict_invalid_json():
-    """3) Valide l'envoi d'un JSON incorrect"""
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        resp = await client.post("/predict", json={"feature1": 3.5, "feature2": 1.2, "feature3": 4.9})
-        assert resp.status_code == 422
+# Test 1 : prédiction correcte avec [1.0, 2.0, 3.0]
+def test_predict_correct():
+    payload = {"features": [1.0, 2.0, 3.0]}
+    response = client.post("/predict", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert "predictions" in data
+    assert data["predictions"] == [2.0, 4.0, 6.0]
+
+
+# Test 2 : prédiction incorrecte — on vérifie que la prédiction
+# n'est PAS égale à une valeur volontairement fausse
+def test_predict_incorrect():
+    payload = {"features": [1.0, 2.0, 3.0]}
+    response = client.post("/predict", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    # Valeur attendue volontairement fausse
+    valeur_fausse = [9999.0, 9999.0, 9999.0]
+    # On vérifie que l'API ne renvoie PAS cette valeur fausse
+    assert data["predictions"] != valeur_fausse
+
+
+# Test 3 : JSON incorrect (features manquant)
+def test_predict_invalid_json():
+    payload = {"data": [3.5, 1.2, 4.9]}
+    response = client.post("/predict", json=payload)
+    assert response.status_code == 422
